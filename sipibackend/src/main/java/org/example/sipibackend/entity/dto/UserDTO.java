@@ -23,8 +23,8 @@ public class UserDTO {
         user.setAge(this.age);
         user.setPassword(this.password);
         user.setRole(this.role);
-        user.setIsActive(this.isActive);
-        user.setActiveAccount(this.activeAccount);
+        user.setIsActive(true);
+        user.setActiveAccount(true);
         return user;
     }
 }
