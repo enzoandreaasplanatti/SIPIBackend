@@ -36,6 +36,12 @@ public class Publications {
     @Column
     private String direccion;
 
+    @Column
+    private Integer calificacionCount = 0;
+
+    @Embedded
+    private FiltersDescription filtersDescription;
+
 
     @ManyToOne
     @JoinColumn(name = "usuario_id")
@@ -57,6 +63,11 @@ public class Publications {
     public Set<Filter> getFilters() {
         return filtros;
     }
+
+    public Filter getFiltro() {
+        return filtros != null && !filtros.isEmpty() ? filtros.iterator().next() : null;
+    }
+
 
     public void setFiltro(Filter filtro) {
         if (filtros == null) {

@@ -20,5 +20,6 @@ public class PublicationDTO {
     private Long usuarioId;
 
     private Long filtroId;
+    private FiltersDescription filtersDescription;
 
 }

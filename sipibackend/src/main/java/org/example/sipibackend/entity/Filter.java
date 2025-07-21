@@ -14,9 +14,7 @@ public class Filter {
     @Id
     private Long id;
 
-    @Column
+    @Column(unique = true)
     private String nombre;
 
-    @ManyToMany(mappedBy = "filtros")
-    private Set<Publications> publicaciones = new HashSet<>();
 }

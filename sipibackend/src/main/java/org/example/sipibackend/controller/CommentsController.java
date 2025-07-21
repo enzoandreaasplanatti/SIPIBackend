@@ -7,9 +7,12 @@ import org.example.sipibackend.entity.dto.CommentDto;
 import org.example.sipibackend.repository.CommentsRepository;
 import org.example.sipibackend.repository.PublicationsRepository;
 import org.example.sipibackend.repository.UserRepository;
+import org.example.sipibackend.service.CommentsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/comments")
@@ -23,6 +26,8 @@ public class CommentsController {
 
     @Autowired
     private PublicationsRepository publicationsRepository;
+    @Autowired
+    private CommentsService commentsService;
 
     @PostMapping
     public ResponseEntity<?> createComment(@RequestBody CommentDto commentDto) {
@@ -32,7 +37,14 @@ public class CommentsController {
         if (usuario == null || publicacion == null) {
             return ResponseEntity.badRequest().body("Usuario o publicación no encontrados");
         }
-
+        // Validar si la publicación permite interacción
+        if (publicacion.getAvailabeToRate() == null || !publicacion.getAvailabeToRate()) {
+            return ResponseEntity.status(403).body("La publicación no permite comentarios ni calificaciones en este momento.");
+        }
+        // Validar que el usuario no sea el dueño de la publicación
+        if (publicacion.getUsuario().getId().equals(usuario.getId())) {
+            return ResponseEntity.status(403).body("No puedes comentar ni calificar tus propias publicaciones.");
+        }
         Comments comment = new Comments();
         comment.setContenido(commentDto.getContenido());
         comment.setCalificacion(commentDto.getCalificacion());
@@ -41,6 +53,30 @@ public class CommentsController {
 
         commentsRepository.save(comment);
 
-        return ResponseEntity.ok(comment);
+        // Crear un DTO para la respuesta y evitar problemas de lazy loading
+        CommentDto responseDto = new CommentDto();
+        responseDto.setId(comment.getId());
+        responseDto.setUsuarioId(usuario.getId());
+        responseDto.setPublicacionId(publicacion.getId());
+        responseDto.setContenido(comment.getContenido());
+        responseDto.setCalificacion(comment.getCalificacion());
+
+        return ResponseEntity.ok(responseDto);
+    }
+
+    @GetMapping("/publication/{publicationId}")
+    public ResponseEntity<List<CommentDto>> getCommentsByPublication(@PathVariable Long publicationId) {
+        List<Comments> comments = commentsService.findByPublicacionId(publicationId);
+        // Mapear a DTO para evitar problemas de lazy loading
+        List<CommentDto> dtos = comments.stream().map(comment -> {
+            CommentDto dto = new CommentDto();
+            dto.setId(comment.getId());
+            dto.setUsuarioId(comment.getUsuario().getId());
+            dto.setPublicacionId(comment.getPublicacion().getId());
+            dto.setContenido(comment.getContenido());
+            dto.setCalificacion(comment.getCalificacion());
+            return dto;
+        }).toList();
+        return ResponseEntity.ok(dtos);
     }
 }

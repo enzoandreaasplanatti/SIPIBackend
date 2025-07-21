@@ -83,7 +83,7 @@ public class AuthController {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("Email inválido"));
 
-        if (!user.getIsActive()) {
+        if (!user.getActiveAccount()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("La cuenta está desactivada");
         }
 

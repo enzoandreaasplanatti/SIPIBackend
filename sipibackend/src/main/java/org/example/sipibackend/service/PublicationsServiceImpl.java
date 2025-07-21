@@ -34,7 +34,8 @@ public class PublicationsServiceImpl implements PublicationsService {
         if (id == null) {
             throw new IllegalArgumentException("ID cannot be null");
         }
-        return publicationsRepository.findById(id);
+        // Usar fetch join para inicializar filtros y evitar LazyInitializationException
+        return publicationsRepository.findByIdWithFiltros(id);
     }
 
     @Override
