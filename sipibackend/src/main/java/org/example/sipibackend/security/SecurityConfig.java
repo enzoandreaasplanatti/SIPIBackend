@@ -38,6 +38,7 @@ public class SecurityConfig {
                         .requestMatchers("/customer/**").hasAnyRole("ADMIN", "COSTUMER")
                         .requestMatchers("/publisher/**").hasAnyRole("ADMIN", "PUBLISHER")
                         .requestMatchers("/api/comments/**").authenticated()
+                        .requestMatchers("/favorite/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
@@ -72,4 +73,3 @@ public class SecurityConfig {
         return new JwtFilter(jwtService, userRepository);
     }
 }
-

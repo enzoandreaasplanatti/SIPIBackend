@@ -21,8 +21,7 @@ public class Comments {
     @JoinColumn(name = "usuario_id")
     private User usuario;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "publicacion_id")
     private Publications publicacion;
 }
-

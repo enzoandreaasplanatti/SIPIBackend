@@ -11,4 +11,10 @@ public interface PublicationsRepository extends JpaRepository<Publications, Long
 
     @Query("SELECT p FROM Publications p LEFT JOIN FETCH p.filtros WHERE p.id = :id")
     Optional<Publications> findByIdWithFiltros(@Param("id") Long id);
+
+    @Query("SELECT p FROM Publications p LEFT JOIN FETCH p.filtros WHERE p.usuario = :usuario")
+    java.util.List<Publications> findAllByUsuarioWithFiltros(@Param("usuario") org.example.sipibackend.entity.User usuario);
+
+    @Query("SELECT p FROM Publications p LEFT JOIN FETCH p.comentarios WHERE p.id = :id")
+    Optional<Publications> findByIdWithComentarios(@Param("id") Long id);
 }

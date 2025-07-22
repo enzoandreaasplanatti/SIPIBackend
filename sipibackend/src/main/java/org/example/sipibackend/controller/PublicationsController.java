@@ -15,6 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -220,5 +221,40 @@ public class PublicationsController {
         publication.setAvailabeToRate(availabeToRate);
         publicationService.save(publication);
         return ResponseEntity.ok("Interacción actualizada correctamente.");
+    }
+
+    @GetMapping("/by-publisher/{publisherId}")
+    public ResponseEntity<List<Publications>> getByPublisher(@PathVariable Long publisherId) {
+        Optional<User> publisher = userService.findById(publisherId);
+        if (publisher.isEmpty()) return ResponseEntity.notFound().build();
+        List<Publications> publicaciones = publicationService.findByUsuario(publisher.get());
+        return ResponseEntity.ok(publicaciones);
+    }
+
+    @GetMapping("/mis-publicaciones")
+    public ResponseEntity<List<PublicationDTO>> getMyPublications() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        Optional<User> userOpt = userService.findByEmail(email);
+        if (userOpt.isEmpty()) return ResponseEntity.notFound().build();
+        List<Publications> publicaciones = publicationService.findByUsuario(userOpt.get());
+        List<PublicationDTO> dtos = publicaciones.stream().map(pub -> {
+            PublicationDTO dto = new PublicationDTO();
+            dto.setId(pub.getId());
+            dto.setFoto(pub.getFoto());
+            dto.setTitulo(pub.getTitulo());
+            dto.setDateTime(pub.getDateTime());
+            dto.setDescripcion(pub.getDescripcion());
+            dto.setCalificacion(pub.getCalificacion());
+            dto.setAvailabeToRate(pub.getAvailabeToRate());
+            dto.setDireccion(pub.getDireccion());
+            dto.setUsuarioId(pub.getUsuario() != null ? pub.getUsuario().getId() : null);
+            dto.setFiltersDescription(pub.getFiltersDescription());
+            // Si tienes filtros ManyToMany:
+            if (pub.getFiltros() != null)
+                dto.setFiltroIds(pub.getFiltros().stream().map(f -> f.getId()).collect(java.util.stream.Collectors.toSet()));
+            return dto;
+        }).toList();
+        return ResponseEntity.ok(dtos);
     }
 }

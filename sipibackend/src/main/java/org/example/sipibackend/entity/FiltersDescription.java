@@ -27,4 +27,7 @@ public class FiltersDescription {
 
     @Column
     private Boolean patrocinado;   // true = aparece primero o destacado
+
+    @Column
+    private String tipoEvento; // "En grupo", "En pareja", "En familia", "Individual"
 }

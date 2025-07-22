@@ -11,4 +11,8 @@ public interface UserService {
     void logout(UserDTO userDTO);
 
     Optional<User> findByEmail(String email);
+
+    void updateUserInfo(String email, UserDTO userDTO);
+
+    Optional<User> findById(Long publisherId);
 }

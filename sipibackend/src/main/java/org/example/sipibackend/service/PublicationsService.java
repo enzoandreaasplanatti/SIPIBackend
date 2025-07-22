@@ -2,7 +2,9 @@ package org.example.sipibackend.service;
 
 import org.example.sipibackend.entity.Filter;
 import org.example.sipibackend.entity.Publications;
+import org.example.sipibackend.entity.User;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -19,4 +21,7 @@ public interface PublicationsService {
 
     Set<Filter> findFiltersByPublicationId(Long publicationId);
 
+    List<Publications> findByUsuario(User user);
+
+    Optional<Publications> findByIdWithComentarios(Long id);
 }

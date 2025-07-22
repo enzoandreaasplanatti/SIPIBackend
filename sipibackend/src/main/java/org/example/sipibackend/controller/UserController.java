@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
 
 @RestController
 @RequestMapping("/auth/user")
@@ -37,6 +38,7 @@ public class UserController {
     }
 
     // Endpoint para calificar/comentar una publicación
+    @Transactional
     @PostMapping("/rate-publication")
     public ResponseEntity<?> ratePublication(@RequestBody PublicationRatingDTO ratingDto) {
         Optional<Publications> optionalPublication = publicationsService.findById(ratingDto.getPublicationId());
@@ -62,15 +64,35 @@ public class UserController {
         comment.setUsuario(user);
         comment.setPublicacion(publication);
         commentsService.save(comment);
-        // Actualizar promedio de calificación
-        int count = publication.getCalificacionCount() != null ? publication.getCalificacionCount() : 0;
-        double actual = publication.getCalificacion() != null ? publication.getCalificacion() : 0.0;
-        int nuevaCalificacion = ratingDto.getCalificacion() != null ? ratingDto.getCalificacion() : 0;
-        double nuevoPromedio = ((actual * count) + nuevaCalificacion) / (count + 1);
-        publication.setCalificacion(nuevoPromedio);
-        publication.setCalificacionCount(count + 1);
-        publicationsService.save(publication);
+        // Volver a obtener la publicación con comentarios actualizados (fetch join)
+        Publications updatedPublication = publicationsService.findByIdWithComentarios(publication.getId()).orElse(publication);
+        java.util.List<Comments> comentarios = updatedPublication.getComentarios() != null ? new java.util.ArrayList<>(updatedPublication.getComentarios()) : new java.util.ArrayList<>();
+        System.out.println("Comentarios encontrados: " + comentarios.size());
+        int total = 0;
+        int suma = 0;
+        for (Comments c : comentarios) {
+            System.out.println("Comentario ID: " + c.getId() + ", calificacion: " + c.getCalificacion());
+            if (c.getCalificacion() != null) {
+                suma += c.getCalificacion();
+                total++;
+            }
+        }
+        System.out.println("Suma: " + suma + ", Total: " + total);
+        double nuevoPromedio = total > 0 ? (double) suma / total : 0.0;
+        System.out.println("Nuevo promedio calculado: " + nuevoPromedio);
+        updatedPublication.setCalificacion(nuevoPromedio);
+        updatedPublication.setCalificacionCount(total);
+        publicationsService.save(updatedPublication);
         return ResponseEntity.ok("Calificación y comentario registrados correctamente. Promedio actual: " + nuevoPromedio);
+    }
+
+    // PATCH para editar datos del usuario autenticado (excepto rol)
+    @PatchMapping("/edit")
+    public ResponseEntity<?> editUser(@RequestBody UserDTO userDTO) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        userService.updateUserInfo(email, userDTO);
+        return ResponseEntity.ok("Datos de usuario actualizados correctamente");
     }
 
 

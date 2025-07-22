@@ -27,8 +27,8 @@ public class Publications {
     @Column
     private String descripcion;
 
-    @Column
-    private Double calificacion;
+    @Column(nullable = false)
+    private Double calificacion = 0.0;
 
     @Column
     private Boolean availabeToRate;
@@ -36,7 +36,7 @@ public class Publications {
     @Column
     private String direccion;
 
-    @Column
+    @Column(nullable = false)
     private Integer calificacionCount = 0;
 
     @Embedded
@@ -49,6 +49,7 @@ public class Publications {
 
 
     @OneToMany(mappedBy = "publicacion", cascade = CascadeType.ALL)
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private Set<Comments> comentarios = new HashSet<>();
 
     @ManyToMany
@@ -57,13 +58,16 @@ public class Publications {
             joinColumns = @JoinColumn(name = "publicacion_id"),
             inverseJoinColumns = @JoinColumn(name = "filtro_id")
     )
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private Set<Filter> filtros = new HashSet<>();
 
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     public Set<Filter> getFilters() {
         return filtros;
     }
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     public Filter getFiltro() {
         return filtros != null && !filtros.isEmpty() ? filtros.iterator().next() : null;
     }

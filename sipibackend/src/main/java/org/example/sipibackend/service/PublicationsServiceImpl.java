@@ -49,27 +49,35 @@ public class PublicationsServiceImpl implements PublicationsService {
 
 
     @Override
-    public Set<Filter> getFiltersByIds(Set<Long> ids) {
-        return new HashSet<>(filterRepository.findAllById(ids));
+    public Set<Filter> getFiltersByIds(Set<Long> filtroIds) {
+        if (filtroIds == null || filtroIds.isEmpty()) return new HashSet<>();
+        return new HashSet<>(filterRepository.findAllById(filtroIds));
     }
 
     @Override
     public Filter findFilterById(Long filtroId) {
-        if (filtroId != null) {
-            return filterRepository.findById(filtroId).orElseThrow(() -> new IllegalArgumentException("Filter not found with ID: " + filtroId));
-        } else {
-            throw new IllegalArgumentException("Filter ID cannot be null");
-        }
+        if (filtroId == null) return null;
+        return filterRepository.findById(filtroId).orElse(null);
     }
 
     @Override
     public Set<Filter> findFiltersByPublicationId(Long publicationId) {
-        Optional<Publications> publicationOpt = publicationsRepository.findById(publicationId);
-        if (publicationOpt.isPresent()) {
-            Publications publication = publicationOpt.get();
-            return publication.getFilters();
-        } else {
-            throw new IllegalArgumentException("Publication not found with ID: " + publicationId);
+        Optional<Publications> pubOpt = publicationsRepository.findById(publicationId);
+        return pubOpt.map(Publications::getFiltros).orElse(new HashSet<>());
+    }
+
+    @Override
+    public java.util.List<Publications> findByUsuario(org.example.sipibackend.entity.User user) {
+        if (user == null) return java.util.Collections.emptyList();
+        return publicationsRepository.findAllByUsuarioWithFiltros(user);
+    }
+
+    @Override
+    public Optional<Publications> findByIdWithComentarios(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("ID cannot be null");
         }
+        // Usar fetch join para inicializar comentarios y evitar LazyInitializationException
+        return publicationsRepository.findByIdWithComentarios(id);
     }
 }
