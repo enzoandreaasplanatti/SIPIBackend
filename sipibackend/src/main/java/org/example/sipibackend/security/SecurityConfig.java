@@ -81,7 +81,8 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
         config.addAllowedOrigin("http://localhost:4002"); // Localhost
-        config.addAllowedOrigin("https://sipibackend.onrender.com"); // Reemplaza por tu dominio de Render
+        config.addAllowedOrigin("http://localhost:8081"); // Frontend en 8081
+        config.addAllowedOrigin("https://sipibackend.onrender.com"); // Dominio de Render
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
 
